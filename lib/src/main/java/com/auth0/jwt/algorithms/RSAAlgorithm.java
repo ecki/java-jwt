@@ -7,11 +7,14 @@ import com.auth0.jwt.interfaces.RSAKeyProvider;
 import org.apache.commons.codec.binary.Base64;
 
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.PSSParameterSpec;
 
 class RSAAlgorithm extends Algorithm {
 
@@ -27,9 +30,22 @@ class RSAAlgorithm extends Algorithm {
         this.keyProvider = keyProvider;
         this.crypto = crypto;
     }
+    //Visible for testing
+    RSAAlgorithm(CryptoHelper crypto, String id, String algorithm, RSAKeyProvider keyProvider, AlgorithmParameterSpec param) throws IllegalArgumentException {
+        super(id, algorithm, param);
+        if (keyProvider == null) {
+            throw new IllegalArgumentException("The Key Provider cannot be null.");
+        }
+        this.keyProvider = keyProvider;
+        this.crypto = crypto;
+    }
 
     RSAAlgorithm(String id, String algorithm, RSAKeyProvider keyProvider) throws IllegalArgumentException {
-        this(new CryptoHelper(), id, algorithm, keyProvider);
+        this(new CryptoHelper(), id, algorithm, keyProvider, null);
+    }
+
+    RSAAlgorithm(String id, String algorithm, RSAKeyProvider keyProvider, AlgorithmParameterSpec spec) throws IllegalArgumentException {
+        this(new CryptoHelper(), id, algorithm, keyProvider, spec);
     }
 
     @Override
@@ -58,8 +74,8 @@ class RSAAlgorithm extends Algorithm {
             if (privateKey == null) {
                 throw new IllegalStateException("The given Private Key is null.");
             }
-            return crypto.createSignatureFor(getDescription(), privateKey, contentBytes);
-        } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException | IllegalStateException e) {
+            return crypto.createSignatureFor(getDescription(), privateKey, contentBytes, getParameterSpec());
+        } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException | IllegalStateException | InvalidAlgorithmParameterException e) {
             throw new SignatureGenerationException(this, e);
         }
     }

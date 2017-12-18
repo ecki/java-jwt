@@ -8,6 +8,9 @@ import com.auth0.jwt.interfaces.RSAKeyProvider;
 
 import java.io.UnsupportedEncodingException;
 import java.security.interfaces.*;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.MGF1ParameterSpec;
+import java.security.spec.PSSParameterSpec;
 
 /**
  * The Algorithm class represents an algorithm to be used in the Signing or Verification process of a Token.
@@ -17,6 +20,7 @@ public abstract class Algorithm {
 
     private final String name;
     private final String description;
+    private final AlgorithmParameterSpec paramSpec;
 
     /**
      * Creates a new Algorithm instance using SHA256withRSA. Tokens specify this as "RS256".
@@ -131,6 +135,88 @@ public abstract class Algorithm {
         RSAPrivateKey privateKey = key instanceof RSAPrivateKey ? (RSAPrivateKey) key : null;
         return RSA512(publicKey, privateKey);
     }
+
+    /**
+     * Creates a new Algorithm instance using SHA256withRSAandMGF1.
+     * Tokens specify this as "PS256".
+     *
+     * @param keyProvider the provider of the Public Key and Private Key for the verify and signing instance.
+     * @return a valid RSAPSS256 Algorithm.
+     * @throws IllegalArgumentException if the Key Provider is null.
+     */
+    public static Algorithm RSAPSS256(RSAKeyProvider keyProvider) throws IllegalArgumentException {
+        MGF1ParameterSpec mgfSpec = new MGF1ParameterSpec("SHA256");
+        PSSParameterSpec param = new PSSParameterSpec("SHA256", "MGF1", mgfSpec, 256/8, 1);
+        return new RSAAlgorithm("PS256", "SHA256withRSAandMGF1", keyProvider, param);
+    }
+
+    /**
+     * Creates a new Algorithm instance using SHA256withRSAandMGF1.
+     * Tokens specify this as "PS256".
+     *
+     * @param publicKey  the key to use in the verify instance.
+     * @param privateKey the key to use in the signing instance.
+     * @return a valid RSAPSS256 Algorithm.
+     * @throws IllegalArgumentException if both provided Keys are null.
+     */
+    public static Algorithm RSAPSS256(RSAPublicKey publicKey, RSAPrivateKey privateKey) throws IllegalArgumentException {
+        return RSAPSS256(RSAAlgorithm.providerForKeys(publicKey, privateKey));
+    }
+
+    /**
+     * Creates a new Algorithm instance using SHA384withRSAandMGF1.
+     * Tokens specify this as "PS384".
+     *
+     * @param keyProvider the provider of the Public Key and Private Key for the verify and signing instance.
+     * @return a valid RSAPSS384 Algorithm.
+     * @throws IllegalArgumentException if the Key Provider is null.
+     */
+    public static Algorithm RSAPSS384(RSAKeyProvider keyProvider) throws IllegalArgumentException {
+        MGF1ParameterSpec mgfSpec = new MGF1ParameterSpec("SHA384");
+        PSSParameterSpec param = new PSSParameterSpec("SHA384", "MGF1", mgfSpec, 384/8, 1);
+        return new RSAAlgorithm("PS384", "SHA384withRSAandMGF1", keyProvider, param);
+    }
+
+    /**
+     * Creates a new Algorithm instance using SHA384withRSAandMGF1.
+     * Tokens specify this as "PS384".
+     *
+     * @param publicKey  the key to use in the verify instance.
+     * @param privateKey the key to use in the signing instance.
+     * @return a valid RSAPSS384 Algorithm.
+     * @throws IllegalArgumentException if both provided Keys are null.
+     */
+    public static Algorithm RSAPSS384(RSAPublicKey publicKey, RSAPrivateKey privateKey) throws IllegalArgumentException {
+        return RSAPSS384(RSAAlgorithm.providerForKeys(publicKey, privateKey));
+    }
+
+    /**
+     * Creates a new Algorithm instance using SHA512withRSAwithMGF1.
+     * Tokens specify this as "PS512".
+     *
+     * @param keyProvider the provider of the Public Key and Private Key for the verify and signing instance.
+     * @return a valid RSAPSS512 Algorithm.
+     * @throws IllegalArgumentException if the Key Provider is null.
+     */
+    public static Algorithm RSAPSS512(RSAKeyProvider keyProvider) throws IllegalArgumentException {
+        MGF1ParameterSpec mgfSpec = new MGF1ParameterSpec("SHA512");
+        PSSParameterSpec param = new PSSParameterSpec("SHA512", "MGF1", mgfSpec, 512/8, 1);
+        return new RSAAlgorithm("PS512", "SHA512withRSAandMGF1", keyProvider, param);
+    }
+
+    /**
+     * Creates a new Algorithm instance using SHA512withRSAwithMGF1.
+     * Tokens specify this as "PS512".
+     *
+     * @param publicKey  the key to use in the verify instance.
+     * @param privateKey the key to use in the signing instance.
+     * @return a valid RSAPSS512 Algorithm.
+     * @throws IllegalArgumentException if both provided Keys are null.
+     */
+    public static Algorithm RSAPSS512(RSAPublicKey publicKey, RSAPrivateKey privateKey) throws IllegalArgumentException {
+        return RSAPSS512(RSAAlgorithm.providerForKeys(publicKey, privateKey));
+    }
+
 
     /**
      * Creates a new Algorithm instance using HmacSHA256. Tokens specify this as "HS256".
@@ -323,6 +409,13 @@ public abstract class Algorithm {
     protected Algorithm(String name, String description) {
         this.name = name;
         this.description = description;
+        this.paramSpec = null;
+    }
+
+    protected Algorithm(String name, String description, AlgorithmParameterSpec paramSpec) {
+        this.name = name;
+        this.description = description;
+        this.paramSpec = paramSpec;
     }
 
     /**
@@ -350,6 +443,15 @@ public abstract class Algorithm {
      */
     String getDescription() {
         return description;
+    }
+
+    /**
+     * Getter for the signature specific algorithm parameters, or null.
+     *
+     * @return the parameter spec.
+     */
+    AlgorithmParameterSpec getParameterSpec() {
+        return paramSpec;
     }
 
     @Override

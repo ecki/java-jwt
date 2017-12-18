@@ -3,6 +3,7 @@ package com.auth0.jwt.algorithms;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
+import java.security.spec.AlgorithmParameterSpec;
 
 class CryptoHelper {
 
@@ -25,6 +26,15 @@ class CryptoHelper {
 
     byte[] createSignatureFor(String algorithm, PrivateKey privateKey, byte[] contentBytes) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         final Signature s = Signature.getInstance(algorithm);
+        s.initSign(privateKey);
+        s.update(contentBytes);
+        return s.sign();
+    }
+
+    byte[] createSignatureFor(String algorithm, PrivateKey privateKey, byte[] contentBytes, AlgorithmParameterSpec paramSpec) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidAlgorithmParameterException {
+        final Signature s = Signature.getInstance(algorithm);
+        if (paramSpec != null)
+            s.setParameter(paramSpec);
         s.initSign(privateKey);
         s.update(contentBytes);
         return s.sign();

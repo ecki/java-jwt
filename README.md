@@ -43,6 +43,10 @@ The library implements JWT Verification and Signing using the following algorith
 | ES256 | ECDSA256 | ECDSA with curve P-256 and SHA-256 |
 | ES384 | ECDSA384 | ECDSA with curve P-384 and SHA-384 |
 | ES512 | ECDSA512 | ECDSA with curve P-521 and SHA-512 |
+| PS256 | RSAPSS256 | RSASS-PSS with SHA-256 |
+| PS384 | RSAPSS384 | RSASS-PSS with SHA-384 |
+| PS512 | RSAPSS512 | RSASS-PSS with SHA-512 |
+
 
 ## Usage
 
